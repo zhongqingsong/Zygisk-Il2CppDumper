@@ -2,15 +2,16 @@
 // Created by Perfare on 2020/7/4.
 //
 
-#include "hack.h"
 #include <cstring>
 #include <cstdio>
-#include <unistd.h>
 #include <sys/system_properties.h>
+#include <unistd.h>
 #include <dlfcn.h>
+#include <xdl.h>
+
 #include "il2cpp_dump.h"
 #include "game.h"
-#include <xdl.h>
+#include "hack.h"
 
 int isGame(JNIEnv *env, jstring appDataDir) {
     if (!appDataDir)

@@ -2,8 +2,6 @@
 // Created by Perfare on 2020/7/4.
 //
 
-#include "il2cpp_dump.h"
-#include <dlfcn.h>
 #include <cstdlib>
 #include <cstring>
 #include <cinttypes>
@@ -11,7 +9,10 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <dlfcn.h>
 #include <xdl.h>
+
+#include "il2cpp_dump.h"
 #include "log.h"
 #include "il2cpp-tabledefs.h"
 #include "il2cpp-class.h"
@@ -84,6 +85,8 @@ std::string get_method_modifier(uint32_t flags) {
             break;
         case METHOD_ATTRIBUTE_FAM_OR_ASSEM:
             outPut << "protected internal ";
+            break;
+        default:
             break;
     }
     if (flags & METHOD_ATTRIBUTE_STATIC) {
