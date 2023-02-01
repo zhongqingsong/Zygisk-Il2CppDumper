@@ -37,7 +37,8 @@ afterEvaluate {
         def variantCapped = variant.name.capitalize()
         def variantLowered = variant.name.toLowerCase()
 
-        def zipName = "${magiskModuleId.replace('_', '-')}-${moduleVersion}-${variantLowered}.zip"
+//        def zipName = "Zygisk_Defaut.zip"
+        def zipName = "Zygisk_Game.zip"
         def magiskDir = file("$outDir/magisk_module_$variantLowered")
 
         task("prepareMagiskFiles${variantCapped}", type: Sync) {
