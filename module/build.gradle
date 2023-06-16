@@ -37,7 +37,6 @@ afterEvaluate {
         def variantCapped = variant.name.capitalize()
         def variantLowered = variant.name.toLowerCase()
 
-//        def zipName = "Zygisk_Defaut.zip"
         def zipName = "Zygisk_Game.zip"
         def magiskDir = file("$outDir/magisk_module_$variantLowered")
 
@@ -81,8 +80,8 @@ afterEvaluate {
         task("zip${variantCapped}", type: Zip) {
             dependsOn("prepareMagiskFiles${variantCapped}")
             from magiskDir
-            archiveName zipName
-            destinationDir outDir
+            archiveFileName.set(zipName)
+            destinationDirectory.set(outDir)
         }
 
         task("push${variantCapped}", type: Exec) {

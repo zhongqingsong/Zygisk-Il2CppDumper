@@ -4,6 +4,6 @@ ext {
     moduleName = "Il2CppDumper"
     moduleAuthor = "Perfare"
     moduleDescription = "Il2CppDumper 的 Zygisk 自用版，用来动态解密游戏的dump.cs。无法适用于so加载太慢的游戏。"
-    moduleVersion = "v1.0.2"
+    moduleVersion = "v1.1.0"
     moduleVersionCode = 1
 }

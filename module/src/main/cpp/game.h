@@ -4,7 +4,8 @@
  在game.h, 修改GamePackageName为游戏包名
 
 2. 编译模块：直接run，不要做clean、切换等危险操作
- 运行:module:assembleRelease（结果zip包生成在out文件夹）
+ 运行:module:assembleRelease
+ 产物：Zygisk-Il2CppDumper\out\Zygisk_Game.zip
 3. 发送模块：复制到cmd，运行即可
 
 adb push F:\gp\Zygisk-Il2CppDumper\out\Zygisk_Game.zip /sdcard/Download/

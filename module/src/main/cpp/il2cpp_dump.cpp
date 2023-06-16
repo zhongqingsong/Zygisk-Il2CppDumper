@@ -2,6 +2,8 @@
 // Created by Perfare on 2020/7/4.
 //
 
+#include "il2cpp_dump.h"
+#include <dlfcn.h>
 #include <cstdlib>
 #include <cstring>
 #include <cinttypes>
@@ -9,10 +11,8 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-#include <dlfcn.h>
-#include <xdl.h>
-
-#include "il2cpp_dump.h"
+#include <unistd.h>
+#include "xdl.h"
 #include "log.h"
 #include "il2cpp-tabledefs.h"
 #include "il2cpp-class.h"
@@ -38,34 +38,6 @@ void init_il2cpp_api(void *handle) {
 #undef DO_API
 }
 
-uint64_t get_module_base(const char *module_name) {
-    uint64_t addr = 0;
-    char line[1024];
-    uint64_t start = 0;
-    uint64_t end = 0;
-    char flags[5];
-    char path[PATH_MAX];
-
-    FILE *fp = fopen("/proc/self/maps", "r");
-    if (fp != nullptr) {
-        while (fgets(line, sizeof(line), fp)) {
-            strcpy(path, "");
-            sscanf(line, "%" PRIx64"-%" PRIx64" %s %*" PRIx64" %*x:%*x %*u %s\n", &start, &end,
-                   flags, path);
-#if defined(__aarch64__)
-            if (strstr(flags, "x") == 0) //TODO
-                continue;
-#endif
-            if (strstr(path, module_name)) {
-                addr = start;
-                break;
-            }
-        }
-        fclose(fp);
-    }
-    return addr;
-}
-
 std::string get_method_modifier(uint32_t flags) {
     std::stringstream outPut;
     auto access = flags & METHOD_ATTRIBUTE_MEMBER_ACCESS_MASK;
@@ -85,8 +57,6 @@ std::string get_method_modifier(uint32_t flags) {
             break;
         case METHOD_ATTRIBUTE_FAM_OR_ASSEM:
             outPut << "protected internal ";
-            break;
-        default:
             break;
     }
     if (flags & METHOD_ATTRIBUTE_STATIC) {
@@ -352,28 +322,31 @@ std::string dump_type(const Il2CppType *type) {
     return outPut.str();
 }
 
-void il2cpp_dump(void *handle, char *outDir) {
-    //initialize
+void il2cpp_api_init(void *handle) {
     LOGI("il2cpp_handle: %p", handle);
     init_il2cpp_api(handle);
     if (il2cpp_domain_get_assemblies) {
         Dl_info dlInfo;
         if (dladdr((void *) il2cpp_domain_get_assemblies, &dlInfo)) {
             il2cpp_base = reinterpret_cast<uint64_t>(dlInfo.dli_fbase);
-        } else {
-            LOGW("dladdr error, using get_module_base.");
-            il2cpp_base = get_module_base("libil2cpp.so");
         }
         LOGI("il2cpp_base: %" PRIx64"", il2cpp_base);
     } else {
         LOGE("Failed to initialize il2cpp api.");
         return;
     }
+    while (!il2cpp_is_vm_thread(nullptr)) {
+        LOGI("Waiting for il2cpp_init...");
+        sleep(1);
+    }
     auto domain = il2cpp_domain_get();
     il2cpp_thread_attach(domain);
-    //start dump
+}
+
+void il2cpp_dump(const char *outDir) {
     LOGI("dumping...");
     size_t size;
+    auto domain = il2cpp_domain_get();
     auto assemblies = il2cpp_domain_get_assemblies(domain, &size);
     std::stringstream imageOutput;
     for (int i = 0; i < size; ++i) {
@@ -427,7 +400,7 @@ void il2cpp_dump(void *handle, char *outDir) {
             auto imageName = std::string(image_name);
             auto pos = imageName.rfind('.');
             auto imageNameNoExt = imageName.substr(0, pos);
-            auto assemblyFileName = il2cpp_string_new(imageNameNoExt.c_str());
+            auto assemblyFileName = il2cpp_string_new(imageNameNoExt.data());
             auto reflectionAssembly = ((Assembly_Load_ftn) assemblyLoad->methodPointer)(nullptr,
                                                                                         assemblyFileName,
                                                                                         nullptr);
